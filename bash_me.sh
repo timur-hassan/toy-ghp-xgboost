@@ -92,22 +92,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Upload report to GitHub Pages
+      - name: Create docs directory and add content
         run: |
-          mkdir -p public
-          cp reports/model_report.txt public/
-          echo "XGBoost Model Report" > public/index.html
-          echo "<pre>" >> public/index.html
-          cat reports/model_report.txt >> public/index.html
-          echo "</pre>" >> public/index.html
+          mkdir -p docs
+          cp reports/model_report.txt docs/
+          echo "XGBoost Model Report" > docs/index.html
+          echo "<pre>" >> docs/index.html
+          cat reports/model_report.txt >> docs/index.html
+          echo "</pre>" >> docs/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: \${{ secrets.GITHUB_TOKEN }}
-          publish_dir: public
+          publish_dir: docs
 EOF
-
 # Step 5: Commit the workflow and scripts
 echo "Adding and committing files to the repository..."
 git add .
