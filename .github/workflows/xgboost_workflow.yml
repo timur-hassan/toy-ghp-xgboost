@@ -40,17 +40,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: model-report
+          path: reports
+
       - name: Create docs directory and add content
         run: |
           mkdir -p docs
           cp reports/model_report.txt docs/
-          echo "XGBoost Model Report" > docs/index.html
+          echo "<!DOCTYPE html>" > docs/index.html
+          echo "<html>" >> docs/index.html
+          echo "<head><title>XGBoost Model Report</title></head>" >> docs/index.html
+          echo "<body>" >> docs/index.html
+          echo "<h1>XGBoost Model Report</h1>" >> docs/index.html
           echo "<pre>" >> docs/index.html
           cat reports/model_report.txt >> docs/index.html
           echo "</pre>" >> docs/index.html
+          echo "</body>" >> docs/index.html
+          echo "</html>" >> docs/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs
+          publish_dir: ./docs

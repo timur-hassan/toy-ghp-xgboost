@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn.metrics import classification_report
+import os
+
+# Create reports directory if it doesn't exist
+os.makedirs('reports', exist_ok=True)
 
 # Generate synthetic dataset
 X, y = np.random.rand(1000, 10), np.random.randint(0, 2, 1000)
@@ -11,7 +15,7 @@ X, y = np.random.rand(1000, 10), np.random.randint(0, 2, 1000)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # Train XGBoost classifier
-model = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+model = XGBClassifier(eval_metric='logloss')
 model.fit(X_train, y_train)
 
 # Make predictions

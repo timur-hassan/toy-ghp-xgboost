@@ -16,14 +16,19 @@ echo "Creating directory structure..."
 mkdir -p .github/workflows
 mkdir -p scripts
 mkdir -p reports
+mkdir -p docs
 
 # Step 3: Create the Python script for XGBoost on synthetic data
-cat > scripts/xgboost_example.py <<EOF
+cat > scripts/xgboost_example.py << 'EOF'
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn.metrics import classification_report
+import os
+
+# Create reports directory if it doesn't exist
+os.makedirs('reports', exist_ok=True)
 
 # Generate synthetic dataset
 X, y = np.random.rand(1000, 10), np.random.randint(0, 2, 1000)
@@ -32,7 +37,7 @@ X, y = np.random.rand(1000, 10), np.random.randint(0, 2, 1000)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # Train XGBoost classifier
-model = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+model = XGBClassifier(eval_metric='logloss')
 model.fit(X_train, y_train)
 
 # Make predictions
@@ -49,7 +54,7 @@ print("Model report generated at reports/model_report.txt")
 EOF
 
 # Step 4: Create the GitHub workflow YAML file
-cat > .github/workflows/xgboost_workflow.yml <<EOF
+cat > .github/workflows/xgboost_workflow.yml << 'EOF'
 name: XGBoost Workflow
 
 on:
@@ -92,21 +97,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: model-report
+          path: reports
+
       - name: Create docs directory and add content
         run: |
           mkdir -p docs
           cp reports/model_report.txt docs/
-          echo "XGBoost Model Report" > docs/index.html
+          echo "<!DOCTYPE html>" > docs/index.html
+          echo "<html>" >> docs/index.html
+          echo "<head><title>XGBoost Model Report</title></head>" >> docs/index.html
+          echo "<body>" >> docs/index.html
+          echo "<h1>XGBoost Model Report</h1>" >> docs/index.html
           echo "<pre>" >> docs/index.html
           cat reports/model_report.txt >> docs/index.html
           echo "</pre>" >> docs/index.html
+          echo "</body>" >> docs/index.html
+          echo "</html>" >> docs/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: \${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
 EOF
+
 # Step 5: Commit the workflow and scripts
 echo "Adding and committing files to the repository..."
 git add .
