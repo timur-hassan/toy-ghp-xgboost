@@ -84,28 +84,12 @@ jobs:
         with:
           name: model-report
           path: reports
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Build Pages
+      - name: Create Pages
         run: |
           mkdir -p docs
-          cp reports/model_report.txt docs/
-          cat > docs/_config.yml << 'EOL'
-          title: XGBoost Model Report
-          baseurl: "/toy-ghp-xgboost"
-          url: "https://timur-hassan.github.io"
-          theme: jekyll-theme-minimal
-          EOL
-          cat > docs/index.md << 'EOL'
-          ---
-          layout: default
-          ---
-          # XGBoost Model Report
-          
-          ```
-          $(cat reports/model_report.txt)
-          ```
-          EOL
+          echo "<html><body><pre>" > docs/index.html
+          cat reports/model_report.txt >> docs/index.html
+          echo "</pre></body></html>" >> docs/index.html
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
