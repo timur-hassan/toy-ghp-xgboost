@@ -18,7 +18,15 @@ mkdir -p scripts
 mkdir -p reports
 mkdir -p docs
 
-# Step 3: Create the Python script for XGBoost on synthetic data
+# Step 3: Create Jekyll config
+cat > docs/_config.yml << EOF
+title: XGBoost Model Report
+baseurl: "/toy-ghp-xgboost"
+url: "https://timur-hassan.github.io"
+theme: jekyll-theme-minimal
+EOF
+
+# Step 4: Create the Python script
 cat > scripts/xgboost_example.py << 'EOF'
 import numpy as np
 import pandas as pd
@@ -27,33 +35,20 @@ from xgboost import XGBClassifier
 from sklearn.metrics import classification_report
 import os
 
-# Create reports directory if it doesn't exist
 os.makedirs('reports', exist_ok=True)
 
-# Generate synthetic dataset
 X, y = np.random.rand(1000, 10), np.random.randint(0, 2, 1000)
-
-# Split data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-# Train XGBoost classifier
 model = XGBClassifier(eval_metric='logloss')
 model.fit(X_train, y_train)
-
-# Make predictions
 y_pred = model.predict(X_test)
-
-# Generate classification report
 report = classification_report(y_test, y_pred)
 
-# Save report
 with open("reports/model_report.txt", "w") as f:
     f.write(report)
-
-print("Model report generated at reports/model_report.txt")
 EOF
 
-# Step 4: Create the GitHub workflow YAML file
+# Step 5: Create the workflow file
 cat > .github/workflows/xgboost_workflow.yml << 'EOF'
 name: XGBoost Workflow
 
@@ -65,26 +60,15 @@ on:
 jobs:
   run-xgboost:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
+      - run: |
           pip install numpy pandas scikit-learn xgboost
-
-      - name: Run XGBoost script
-        run: python scripts/xgboost_example.py
-
-      - name: Upload report
-        uses: actions/upload-artifact@v3
+          python scripts/xgboost_example.py
+      - uses: actions/upload-artifact@v3
         with:
           name: model-report
           path: reports/model_report.txt
@@ -92,32 +76,27 @@ jobs:
   publish-to-pages:
     needs: run-xgboost
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           name: model-report
           path: reports
-
-      - name: Create docs directory and add content
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Build Pages
         run: |
           mkdir -p docs
           cp reports/model_report.txt docs/
-          echo "<!DOCTYPE html>" > docs/index.html
-          echo "<html>" >> docs/index.html
-          echo "<head><title>XGBoost Model Report</title></head>" >> docs/index.html
-          echo "<body>" >> docs/index.html
-          echo "<h1>XGBoost Model Report</h1>" >> docs/index.html
-          echo "<pre>" >> docs/index.html
-          cat reports/model_report.txt >> docs/index.html
-          echo "</pre>" >> docs/index.html
-          echo "</body>" >> docs/index.html
-          echo "</html>" >> docs/index.html
-
+          cat > docs/index.html << 'EOL'
+          ---
+          layout: default
+          ---
+          <h1>XGBoost Model Report</h1>
+          <pre>
+          $(cat reports/model_report.txt)
+          </pre>
+          EOL
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -125,9 +104,8 @@ jobs:
           publish_dir: ./docs
 EOF
 
-# Step 5: Commit the workflow and scripts
-echo "Adding and committing files to the repository..."
+# Step 6: Commit changes
 git add .
-git commit -m "Add XGBoost workflow and scripts"
+git commit -m "Setup complete with Jekyll configuration"
 
-echo "Done! Push your repository to GitHub and ensure GitHub Pages is enabled."
+echo "Done! Now push to GitHub and ensure GitHub Pages is enabled."
