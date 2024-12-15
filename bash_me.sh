@@ -18,13 +18,8 @@ mkdir -p scripts
 mkdir -p reports
 mkdir -p docs
 
-# Step 3: Create Jekyll config
-cat > docs/_config.yml << EOF
-title: XGBoost Model Report
-baseurl: "/toy-ghp-xgboost"
-url: "https://timur-hassan.github.io"
-theme: jekyll-theme-minimal
-EOF
+# Step 3: Create .nojekyll file
+touch docs/.nojekyll
 
 # Step 4: Create the Python script
 cat > scripts/xgboost_example.py << 'EOF'
@@ -87,6 +82,7 @@ jobs:
       - name: Create Pages
         run: |
           mkdir -p docs
+          touch docs/.nojekyll
           echo "<html><body><pre>" > docs/index.html
           cat reports/model_report.txt >> docs/index.html
           echo "</pre></body></html>" >> docs/index.html
@@ -100,6 +96,6 @@ EOF
 
 # Step 6: Commit changes
 git add .
-git commit -m "Setup complete with Jekyll configuration"
+git commit -m "Setup complete with .nojekyll"
 
 echo "Done! Now push to GitHub and ensure GitHub Pages is enabled."

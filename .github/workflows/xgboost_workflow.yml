@@ -35,6 +35,7 @@ jobs:
       - name: Create Pages
         run: |
           mkdir -p docs
+          touch docs/.nojekyll
           echo "<html><body><pre>" > docs/index.html
           cat reports/model_report.txt >> docs/index.html
           echo "</pre></body></html>" >> docs/index.html
