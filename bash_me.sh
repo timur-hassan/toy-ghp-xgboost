@@ -86,12 +86,11 @@ jobs:
           echo "<html><body><pre>" > docs/index.html
           cat reports/model_report.txt >> docs/index.html
           echo "</pre></body></html>" >> docs/index.html
+          ls -la docs/  # Debug: List contents of docs directory
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
+          folder: docs
 EOF
 
 # Step 6: Commit changes
