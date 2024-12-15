@@ -68,31 +68,32 @@ jobs:
           name: model-report
           path: reports/model_report.txt
 
-  publish-to-pages:
+  deploy:
     needs: run-xgboost
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
           name: model-report
           path: reports
-      - name: Create Pages
+      - name: Create site
         run: |
-          mkdir -p docs
-          touch docs/.nojekyll
-          echo "<html><body><pre>" > docs/index.html
-          cat reports/model_report.txt >> docs/index.html
-          echo "</pre></body></html>" >> docs/index.html
-          ls -la docs/  # Debug: List contents of docs directory
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+          mkdir -p public
+          touch public/.nojekyll
+          echo "<html><body><pre>" > public/index.html
+          cat reports/model_report.txt >> public/index.html
+          echo "</pre></body></html>" >> public/index.html
+      - name: Deploy
+        uses: actions/upload-pages-artifact@v2
         with:
-          folder: docs
+          path: public
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+        with:
+          artifact_name: github-pages
 EOF
-
 # Step 6: Commit changes
 git add .
 git commit -m "Setup complete with .nojekyll"
