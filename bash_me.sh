@@ -76,6 +76,8 @@ jobs:
   publish-to-pages:
     needs: run-xgboost
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -88,20 +90,28 @@ jobs:
         run: |
           mkdir -p docs
           cp reports/model_report.txt docs/
-          cat > docs/index.html << 'EOL'
+          cat > docs/_config.yml << 'EOL'
+          title: XGBoost Model Report
+          baseurl: "/toy-ghp-xgboost"
+          url: "https://timur-hassan.github.io"
+          theme: jekyll-theme-minimal
+          EOL
+          cat > docs/index.md << 'EOL'
           ---
           layout: default
           ---
-          <h1>XGBoost Model Report</h1>
-          <pre>
+          # XGBoost Model Report
+          
+          ```
           $(cat reports/model_report.txt)
-          </pre>
+          ```
           EOL
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
+          force_orphan: true
 EOF
 
 # Step 6: Commit changes
