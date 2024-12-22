@@ -1,7 +1,7 @@
 # XGBoost GitHub Pages Deployment Summary
 
 ## Site URL
-`https://timur-hassan.github.io/toy-ghp-xgboost`
+[https://timur-hassan.github.io/toy-ghp-xgboost]
 
 ## Workflow Overview
 - Runs XGBoost on synthetic data
